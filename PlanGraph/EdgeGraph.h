@@ -10,9 +10,11 @@ private:
 	TCHAR name[20];
 public:
 	EdgeGraph();
+	EdgeGraph(int p1, int p2);
 	LPTSTR getString();
 	void SetPoints(int pt1, int pt2);
-	//bool compareEdge(EdgeGraph* ed);
+	bool compareEdge(EdgeGraph* ed);
+	int IsEntry(int num);
 
 };
 

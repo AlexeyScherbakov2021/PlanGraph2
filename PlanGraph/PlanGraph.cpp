@@ -4,6 +4,8 @@
 #include "framework.h"
 #include "PlanGraph.h"
 #include "EdgeGraph.h"
+#include "PointGraph.h"
+#include "Graph.h"
 
 #define MAX_LOADSTRING 100
 
@@ -15,17 +17,21 @@ HWND hDlg = NULL;
 HWND listBox = NULL;
 HWND combo1 = NULL;
 HWND combo2 = NULL;
-int cntPoints = 0;
+//int cntPoints = 0;
 std::vector<EdgeGraph> listEdge;
-//std::list<EdgeGraph> listEdge;
+std::vector<PointGraph*> listPoint;
+bool IsTestValid = FALSE;
+Graph graph;
 
 // Отправить объявления функций, включенных в этот модуль кода:
-ATOM                MyRegisterClass(HINSTANCE hInstance);
-BOOL                InitInstance(HINSTANCE, int);
+//ATOM                MyRegisterClass(HINSTANCE hInstance);
+//BOOL                InitInstance(HINSTANCE, int);
 INT_PTR CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 //void removeFromList(EdgeGraph* ed);
-bool TestValidGraph();
+bool TestValid();
+//void CalcPoints(int num, PointGraph* parent);
+
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -70,6 +76,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     }
 
     return (int) msg.wParam;
+
 }
 
 
@@ -128,16 +135,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
    return TRUE;
 }
 */
-//
-//  ФУНКЦИЯ: WndProc(HWND, UINT, WPARAM, LPARAM)
-//
-//  ЦЕЛЬ: Обрабатывает сообщения в главном окне.
-//
-//  WM_COMMAND  - обработать меню приложения
-//  WM_PAINT    - Отрисовка главного окна
-//  WM_DESTROY  - отправить сообщение о выходе и вернуться
-//
-//
+
+//-----------------------------------------------------------------------------
 INT_PTR CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     RECT lpRect;
@@ -159,6 +158,18 @@ INT_PTR CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         return (INT_PTR)TRUE;
 
 
+    case WM_CTLCOLORSTATIC:
+        if (((HWND)lParam) == GetDlgItem(hWnd, IDC_STATIC_TEST))
+        {
+            if(IsTestValid)
+                SetTextColor((HDC)wParam, RGB(0, 128, 0));
+            else
+                SetTextColor((HDC)wParam, RGB(255, 0, 0));
+            SetBkMode((HDC)wParam, TRANSPARENT);
+            return (LRESULT)GetStockObject(COLOR_WINDOW);
+        }
+        break;
+
     case WM_COMMAND:
         {
             int wmId = LOWORD(wParam);
@@ -166,7 +177,8 @@ INT_PTR CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             switch (wmId)
             {
 
-            case WM_KILLFOCUS:
+            case IDCANCEL:
+                DestroyWindow(hWnd);
                 break;
 
             case IDC_EDIT_COUNT:
@@ -174,12 +186,12 @@ INT_PTR CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 if (HIWORD(wParam) == 0x200)
                 {
                     // потеря фокуса для количества точек
-                    cntPoints = GetDlgItemInt(hWnd, IDC_EDIT_COUNT, FALSE, FALSE);
+                    graph.cntPoints = GetDlgItemInt(hWnd, IDC_EDIT_COUNT, FALSE, FALSE);
 
                     // получить combo T1
                     ComboBox_ResetContent(combo1);
                     ComboBox_ResetContent(combo2);
-                    // TODO удаление ссылок на ребра
+                    // удаление ссылок на ребра
                     while (ListBox_GetCount(listBox))
                     {
                         edge = (EdgeGraph*)ListBox_GetItemData(listBox, 0);
@@ -187,8 +199,7 @@ INT_PTR CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                         x = ListBox_DeleteString(listBox, 0);
                     }
 
-                    //listEdge.clear();
-                    for (int i = 1; i <= cntPoints; i++)
+                    for (int i = 1; i <= graph.cntPoints; i++)
                     {
                         _itot_s(i, buf, 10);
                         ComboBox_AddString(combo1, buf);
@@ -208,12 +219,18 @@ INT_PTR CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 edge->SetPoints(point1, point2);
                 s = edge->getString();
                 // проверка на уже вставленную строку
-                if( ListBox_FindString(listBox, -1, s) < 0)
+                if( ListBox_FindString(listBox, -1, s) < 0 && point1 != point2)
                 {
                     x = ListBox_AddString(listBox, s);
                     ListBox_SetItemData(listBox, x, edge);
-                    //listEdge.push_back(*edge);
+                    IsTestValid = TestValid();
                 }
+
+                break;
+
+            case IDC_BUTTON_RENDER:
+                graph.RenderGraph(500, 500, hInst, hDlg);
+
                 break;
 
             case IDC_BUTTON_DELETE:
@@ -222,9 +239,13 @@ INT_PTR CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 {
                     edge = (EdgeGraph*)ListBox_GetItemData(listBox, x);
                     delete edge;
-                    //removeFromList(edge);
                     ListBox_DeleteString(listBox, x);
                 }
+                IsTestValid = TestValid();
+                break;
+
+            case IDC_BUTTON_TEST:
+                IsTestValid = TestValid();
                 break;
 
             case IDM_ABOUT:
@@ -236,29 +257,33 @@ INT_PTR CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 break;
 
             default:
-                return DefWindowProc(hWnd, message, wParam, lParam);
+                return FALSE;
             }
         }
         break;
-    case WM_PAINT:
-        {
-            PAINTSTRUCT ps;
-            HDC hdc = BeginPaint(hWnd, &ps);
-            // TODO: Добавьте сюда любой код прорисовки, использующий HDC...
-            EndPaint(hWnd, &ps);
-        }
-        break;
+
+    //case WM_PAINT:
+    //    {
+    //        PAINTSTRUCT ps;
+    //        HDC hdc = BeginPaint(hWnd, &ps);
+    //        // TODO: Добавьте сюда любой код прорисовки, использующий HDC...
+    //        EndPaint(hWnd, &ps);
+    //    }
+    //    break;
     case WM_DESTROY:
         PostQuitMessage(0);
         break;
 
     default:
-        return DefWindowProc(hWnd, message, wParam, lParam);
+        //return DefWindowProc(hWnd, message, wParam, lParam);
+        return FALSE;
     }
     return FALSE;
 }
 
+
 // Обработчик сообщений для окна "О программе".
+//-----------------------------------------------------------------------------
 INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
     UNREFERENCED_PARAMETER(lParam);
@@ -278,31 +303,46 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
     return (INT_PTR)FALSE;
 }
 
-bool TestValidGraph()
+//-----------------------------------------------------------------------------
+bool TestValid()
 {
-    // число ребер должно быть равно количеству точек - 1
-    if (cntPoints - 1 != ListBox_GetCount(listBox))
-        return FALSE;
+    //bool result = TRUE;
+    EdgeGraph* ed;
 
-    // все точки должны быть задействованы
+    HWND hwnd = GetDlgItem(hDlg, IDC_STATIC_TEST);
 
+    graph.cntEdges = ListBox_GetCount(listBox);
 
-    return TRUE;
-}
-
-
-/*void removeFromList(EdgeGraph* ed)
-{
-    std::vector<EdgeGraph>::iterator it;
-
-    for (it = listEdge.begin(); it != listEdge.end(); it++)
+    graph.listEdge.clear();
+    for (int i = 0; i < graph.cntEdges; i++)
     {
-        EdgeGraph e = *it;
-        if (ed->compareEdge(&e))
-        {
-            listEdge.erase(it);
-            return;
-        }
+        ed = (EdgeGraph*)ListBox_GetItemData(listBox, i);
+        graph.listEdge.push_back(*ed);
     }
+
+    int res = graph.TestValidGraph();
+
+    if (res == 0)
+    {
+        SetDlgItemText(hDlg, IDC_STATIC_TEST, _T("Корректно."));
+        ShowWindow(hwnd, FALSE);
+        ShowWindow(hwnd, TRUE);
+        return TRUE;
+    }
+
+    if (res == CYCLED_SIDE)
+    {
+        SetDlgItemText(hDlg, IDC_STATIC_TEST, _T("Есть циклические грани."));
+        ShowWindow(hwnd, FALSE);
+        ShowWindow(hwnd, TRUE);
+    }
+
+    if (res == INVALID_EDGE)
+    {
+        SetDlgItemText(hDlg, IDC_STATIC_TEST, _T("Неверное количество ребер."));
+        ShowWindow(hwnd, FALSE);
+        ShowWindow(hwnd, TRUE);
+    }
+
+    return FALSE;
 }
-*/

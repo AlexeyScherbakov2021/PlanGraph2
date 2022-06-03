@@ -128,12 +128,15 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="EdgeGraph.cpp" />
+    <ClCompile Include="Graph.cpp" />
+    <ClCompile Include="PaintGraph.cpp" />
     <ClCompile Include="PlanGraph.cpp" />
     <ClCompile Include="PointGraph.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="EdgeGraph.h" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="Graph.h" />
     <ClInclude Include="PlanGraph.h" />
     <ClInclude Include="PointGraph.h" />
     <ClInclude Include="resource.h" />

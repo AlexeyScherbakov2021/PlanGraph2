@@ -8,11 +8,25 @@
 		EdgeGraph::point2 = 0;
 	}
 
+	EdgeGraph::EdgeGraph(int p1, int p2)
+	{
+		EdgeGraph::point1 = p1;
+		EdgeGraph::point2 = p2;
+	}
+
 
 	LPTSTR EdgeGraph::getString()
 	{
-		_stprintf_s(EdgeGraph::name, 20, _T(" %2d : %2d "), EdgeGraph::point1, EdgeGraph::point2);
-		//std::string s = std::to_string(EdgeGraph::point1) + " : " + std::to_string(EdgeGraph::point2);
+		int p1 = EdgeGraph::point1;
+		int p2 = EdgeGraph::point2;
+
+		if (p2 < p1)
+		{
+			p2 = EdgeGraph::point1;
+			p1 = EdgeGraph::point2;
+		}
+
+		_stprintf_s(EdgeGraph::name, 20, _T(" %2d : %2d "), p1, p2);
 		return EdgeGraph::name;
 	}
 
@@ -22,10 +36,22 @@
 		EdgeGraph::point2 = pt2;
 	}
 
-	//bool EdgeGraph::compareEdge(EdgeGraph *ed)
-	//{
-	//	if (EdgeGraph::point1 == ed->point1 && EdgeGraph::point2 == ed->point2)
-	//		return TRUE;
+	bool EdgeGraph::compareEdge(EdgeGraph *ed)
+	{
+		if (EdgeGraph::point1 == ed->point1 && EdgeGraph::point2 == ed->point2)
+			return TRUE;
 
-	//	return FALSE;
-	//}
+		return FALSE;
+	}
+
+	int EdgeGraph::IsEntry(int num)
+	{
+		if (EdgeGraph::point1 == num)
+			return EdgeGraph::point2;
+
+		if (EdgeGraph::point2 == num)
+			return EdgeGraph::point1;
+
+		return -1;
+	}
+

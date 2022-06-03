@@ -1,11 +1,13 @@
 #pragma once
 class PointGraph
 {
-private:
+public:
 	int number;
 	int level;
 	int cntChild;
 	PointGraph *parent;
+	int x;
+	int y;
 
 public:
 	PointGraph();
