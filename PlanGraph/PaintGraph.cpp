@@ -9,7 +9,7 @@ LRESULT  CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
 ATOM MyRegisterClass(HINSTANCE hInstance);
 
 
-void Graph::PaintGraph(int width, int height, HINSTANCE hInstance, HWND hDlg)
+void Graph::PaintGraph(HINSTANCE hInstance, HWND hDlg)
 {
     ATOM res = MyRegisterClass(hInstance);
 
@@ -19,9 +19,6 @@ void Graph::PaintGraph(int width, int height, HINSTANCE hInstance, HWND hDlg)
 
     HWND hWnd = CreateWindow(szClass, _T("Планарный граф"), WS_OVERLAPPEDWINDOW,
         (wScreen - Width) / 2, (hScreen - Height) / 2, Width + 10, Height + 10, nullptr, nullptr, hInstance, nullptr);
-    //HWND hWnd = CreateWindow(szClass, _T("Планарный граф"), WS_POPUPWINDOW | WS_SIZEBOX | WS_BORDER | WS_CAPTION | WS_VISIBLE |
-    //    WS_THICKFRAME | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX,
-    //    (wScreen - Width) / 2, (hScreen - Height) / 2, Width, Height, HWND_DESKTOP, nullptr, hInstance, nullptr);
 
     if (!hWnd)
     {
@@ -73,8 +70,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 
     }
 
-    //return 0;
-
+    return FALSE;
 }
 
 
@@ -105,23 +101,23 @@ void Graph::PaintLevel(HDC hdc)
     int x;
     int y;
 
-    for (int i = 0; i < listPoint.size(); i++)
+    for (unsigned int i = 0; i < listPoint.size(); i++)
     {
         if (listPoint[i]->parent != NULL)
         {
-            MoveToEx(hdc, listPoint[i]->x, listPoint[i]->y, NULL);
-            LineTo(hdc, listPoint[i]->parent->x, listPoint[i]->parent->y);
+            MoveToEx(hdc, (int)listPoint[i]->x, (int)listPoint[i]->y, NULL);
+            LineTo(hdc, (int)listPoint[i]->parent->x, (int)listPoint[i]->parent->y);
         }
     }
 
     RECT rc;
     TCHAR buffer[4];
 
-    for (int i = 0; i < listPoint.size(); i++)
+    for (unsigned int i = 0; i < listPoint.size(); i++)
     {
-        x = listPoint[i]->x - RADIUS_CIRCLE;
-        y = listPoint[i]->y - RADIUS_CIRCLE;
-        Ellipse(hdc, x, y, listPoint[i]->x + RADIUS_CIRCLE, listPoint[i]->y + RADIUS_CIRCLE);
+        x = (int)listPoint[i]->x - RADIUS_CIRCLE;
+        y = (int)listPoint[i]->y - RADIUS_CIRCLE;
+        Ellipse(hdc, x, y, (int)listPoint[i]->x + RADIUS_CIRCLE, (int)listPoint[i]->y + RADIUS_CIRCLE);
         rc.left = x;
         rc.top = y;
         rc.right = x + RADIUS_CIRCLE * 2;

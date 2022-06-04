@@ -17,20 +17,13 @@ HWND hDlg = NULL;
 HWND listBox = NULL;
 HWND combo1 = NULL;
 HWND combo2 = NULL;
-//int cntPoints = 0;
 std::vector<EdgeGraph> listEdge;
 std::vector<PointGraph*> listPoint;
 bool IsTestValid = FALSE;
 Graph graph;
 
-// Отправить объявления функций, включенных в этот модуль кода:
-//ATOM                MyRegisterClass(HINSTANCE hInstance);
-//BOOL                InitInstance(HINSTANCE, int);
 INT_PTR CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
-INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
-//void removeFromList(EdgeGraph* ed);
 bool TestValid();
-//void CalcPoints(int num, PointGraph* parent);
 
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
@@ -40,20 +33,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 {
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
-
-
-    // TODO: Разместите код здесь.
-
-    // Инициализация глобальных строк
-    //LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
-    //LoadStringW(hInstance, IDC_PLANGRAPH, szWindowClass, MAX_LOADSTRING);
-    //MyRegisterClass(hInstance);
-
-    // Выполнить инициализацию приложения:
-    /*if (!InitInstance(hInstance, nCmdShow))
-    {
-        return FALSE;
-    }*/
 
     HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_PLANGRAPH));
 
@@ -78,63 +57,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     return (int) msg.wParam;
 
 }
-
-
-
-//
-//  ФУНКЦИЯ: MyRegisterClass()
-//
-//  ЦЕЛЬ: Регистрирует класс окна.
-//
-/*ATOM MyRegisterClass(HINSTANCE hInstance)
-{
-    WNDCLASSEXW wcex;
-
-    wcex.cbSize = sizeof(WNDCLASSEX);
-
-    wcex.style          = CS_HREDRAW | CS_VREDRAW;
-    wcex.lpfnWndProc    = WndProc;
-    wcex.cbClsExtra     = 0;
-    wcex.cbWndExtra     = 0;
-    wcex.hInstance      = hInstance;
-    wcex.hIcon          = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_PLANGRAPH));
-    wcex.hCursor        = LoadCursor(nullptr, IDC_ARROW);
-    wcex.hbrBackground  = (HBRUSH)(COLOR_WINDOW+1);
-    wcex.lpszMenuName   = MAKEINTRESOURCEW(IDC_PLANGRAPH);
-    wcex.lpszClassName  = szWindowClass;
-    wcex.hIconSm        = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
-
-    return RegisterClassExW(&wcex);
-}
-*/
-//
-//   ФУНКЦИЯ: InitInstance(HINSTANCE, int)
-//
-//   ЦЕЛЬ: Сохраняет маркер экземпляра и создает главное окно
-//
-//   КОММЕНТАРИИ:
-//
-//        В этой функции маркер экземпляра сохраняется в глобальной переменной, а также
-//        создается и выводится главное окно программы.
-//
-/*BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
-{
-   hInst = hInstance; // Сохранить маркер экземпляра в глобальной переменной
-
-   HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-      CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
-
-   if (!hWnd)
-   {
-      return FALSE;
-   }
-
-   ShowWindow(hWnd, nCmdShow);
-   UpdateWindow(hWnd);
-
-   return TRUE;
-}
-*/
 
 //-----------------------------------------------------------------------------
 INT_PTR CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -240,20 +162,12 @@ INT_PTR CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     edge = (EdgeGraph*)ListBox_GetItemData(listBox, x);
                     delete edge;
                     ListBox_DeleteString(listBox, x);
+                    IsTestValid = TestValid();
                 }
-                IsTestValid = TestValid();
                 break;
 
             case IDC_BUTTON_TEST:
                 IsTestValid = TestValid();
-                break;
-
-            case IDM_ABOUT:
-                DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
-                break;
-
-            case IDM_EXIT:
-                DestroyWindow(hWnd);
                 break;
 
             default:
@@ -262,51 +176,20 @@ INT_PTR CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
         break;
 
-    //case WM_PAINT:
-    //    {
-    //        PAINTSTRUCT ps;
-    //        HDC hdc = BeginPaint(hWnd, &ps);
-    //        // TODO: Добавьте сюда любой код прорисовки, использующий HDC...
-    //        EndPaint(hWnd, &ps);
-    //    }
-    //    break;
     case WM_DESTROY:
         PostQuitMessage(0);
         break;
 
     default:
-        //return DefWindowProc(hWnd, message, wParam, lParam);
         return FALSE;
     }
     return FALSE;
 }
 
 
-// Обработчик сообщений для окна "О программе".
-//-----------------------------------------------------------------------------
-INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
-{
-    UNREFERENCED_PARAMETER(lParam);
-    switch (message)
-    {
-    case WM_INITDIALOG:
-        return (INT_PTR)TRUE;
-
-    case WM_COMMAND:
-        if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL)
-        {
-            EndDialog(hDlg, LOWORD(wParam));
-            return (INT_PTR)TRUE;
-        }
-        break;
-    }
-    return (INT_PTR)FALSE;
-}
-
 //-----------------------------------------------------------------------------
 bool TestValid()
 {
-    //bool result = TRUE;
     EdgeGraph* ed;
 
     HWND hwnd = GetDlgItem(hDlg, IDC_STATIC_TEST);

@@ -25,11 +25,11 @@ private:
 
 
 	void CalcPoints(int num, PointGraph* parent);
-	void CalculateXY(int width, int hight);
+	void CalculateXY();
 	float CalculateForPoints(PointGraph* parent);
 	int GetListLevel(std::vector<PointGraph*> *points, int level);
 	void GetChild(int num, std::vector<PointGraph*>* list_Pt);
-	void PaintGraph(int width, int hight, HINSTANCE hInstance, HWND hDlg);
+	void PaintGraph(HINSTANCE hInstance, HWND hDlg);
 	void initPoints();
 
 
@@ -39,6 +39,7 @@ public:
 	int cntEdges;
 
 	Graph();
+	~Graph();
 	int TestValidGraph();
 	void RenderGraph(int width, int hight, HINSTANCE hInstance, HWND hDlg);
 	void PaintLevel(HDC hdc);

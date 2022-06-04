@@ -10,7 +10,16 @@ Graph::Graph()
     Height = 500;
 }
 
+Graph::~Graph()
+{
+    for (unsigned int i = 0; i < listPoint.size(); i++)
+        delete listPoint[i];
+}
 
+
+
+//-----------------------------------------------------------------------------
+// формирует список точек
 //-----------------------------------------------------------------------------
 void Graph::CalcPoints(int num, PointGraph* parent)
 {
@@ -42,6 +51,7 @@ void Graph::CalcPoints(int num, PointGraph* parent)
     }
 }
 
+//-----------------------------------------------------------------------------
 void Graph::initPoints()
 {
     int listInitEdge[][2] =
@@ -88,6 +98,8 @@ void Graph::initPoints()
 }
 
 //-----------------------------------------------------------------------------
+//  проврка графа на правильность
+//-----------------------------------------------------------------------------
 int Graph::TestValidGraph()
 {
     initPoints();
@@ -97,7 +109,10 @@ int Graph::TestValidGraph()
         return INVALID_EDGE;
 
     // все точки должны быть задействованы
+    for (unsigned int i = 0; i < listPoint.size(); i++)
+        delete listPoint[i];
     listPoint.clear();
+
     CalcPoints(1, NULL);
 
     int* testArray = new int[listPoint.size()];
@@ -114,6 +129,8 @@ int Graph::TestValidGraph()
     return EDGE_OK;
 }
 
+//-----------------------------------------------------------------------------
+// рекурсивный расчет координат для всех точек
 //-----------------------------------------------------------------------------
 float Graph::CalculateForPoints(PointGraph* parent)
 {
@@ -180,15 +197,11 @@ float Graph::CalculateForPoints(PointGraph* parent)
 
 
 //-----------------------------------------------------------------------------
-void Graph::CalculateXY(int width, int height)
+void Graph::CalculateXY()
 {
     std::vector<PointGraph*>* points = new std::vector<PointGraph*>();
     unsigned int cntMaxPoints = 0;
-    //int calcLevel;
     int maxLevel = 0;
-    //int delta;
-    //int curX;
-    //int curY;
 
     levelsX = new float[cntLevels + 1];
     for (int i = 0; i <= cntLevels; i++)
@@ -198,8 +211,8 @@ void Graph::CalculateXY(int width, int height)
 
     listPoint[0]->x = CalculateForPoints(listPoint[0]);
 
-    float scaleX = (float)(width - 2 * MARGIN) / maxXGraph;
-    float scaleY = (float)(height - 2 * MARGIN) / (float)(cntLevels + 1);
+    float scaleX = (float)(Width - 2 * MARGIN) / maxXGraph;
+    float scaleY = (float)(Height - 2 * MARGIN) / (float)(cntLevels + 1);
 
     for (unsigned int i = 0; i < listPoint.size(); i++)
     {
@@ -256,9 +269,11 @@ int Graph::GetListLevel(std::vector<PointGraph*> *list_Pt, int level)
 //-----------------------------------------------------------------------------
 // рисование графа
 //-----------------------------------------------------------------------------
-void Graph::RenderGraph(int width, int hight, HINSTANCE hInstance, HWND hDlg)
+void Graph::RenderGraph(int width, int height, HINSTANCE hInstance, HWND hDlg)
 {
-    CalculateXY(width, hight);
-    PaintGraph(width, hight, hInstance, hDlg);
+    Width = width;
+    Height = height;
+    CalculateXY();
+    PaintGraph(hInstance, hDlg);
 
 }
