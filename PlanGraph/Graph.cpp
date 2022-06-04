@@ -1,5 +1,6 @@
 #include "Graph.h"
 
+
 Graph::Graph()
 {
     cntEdges = 0;
@@ -41,51 +42,55 @@ void Graph::CalcPoints(int num, PointGraph* parent)
     }
 }
 
-//-----------------------------------------------------------------------------
-int Graph::TestValidGraph()
+void Graph::initPoints()
 {
+    int listInitEdge[][2] =
+    {
+        {1,2},
+        {1,3},
+        {2,4},
+        {2,5},
+        {2,6},
+        {3,7},
+        {3,8},
+        {4,9},
+        {4,10},
+        {4,11},
+        {5,12},
+        {5,13},
+        {5,14},
+        {5,15},
+        {8,16},
+        {8,17},
+        {8,18},
+        {9,19},
+        {9,20},
+        {11,21},
+        {11,22},
+        {12,23},
+        {12,24}
+    };
+
+    int n = sizeof(listInitEdge) / 8;
+
     EdgeGraph* ed;
-    ed = new EdgeGraph(1, 4);
-    listEdge.push_back(*ed);
 
-    ed = new EdgeGraph(1, 3);
-    listEdge.push_back(*ed);
+    for (int i = 0; i < n; i++)
+    {
+        ed = new EdgeGraph(listInitEdge[i][0], listInitEdge[i][1]);
+        listEdge.push_back(*ed);
 
-    ed = new EdgeGraph(2, 4);
-    listEdge.push_back(*ed);
-
-    ed = new EdgeGraph(8, 4);
-    listEdge.push_back(*ed);
-
-    ed = new EdgeGraph(3, 6);
-    listEdge.push_back(*ed);
-
-    ed = new EdgeGraph(9, 3);
-    listEdge.push_back(*ed);
-
-    ed = new EdgeGraph(10, 7);
-    listEdge.push_back(*ed);
-
-    ed = new EdgeGraph(5, 3);
-    listEdge.push_back(*ed);
-
-    ed = new EdgeGraph(10, 1);
-    listEdge.push_back(*ed);
-
-    ed = new EdgeGraph(8, 11);
-    listEdge.push_back(*ed);
-
-    ed = new EdgeGraph(8, 12);
-    listEdge.push_back(*ed);
-
-    ed = new EdgeGraph(13, 6);
-    listEdge.push_back(*ed);
-
-    ed = new EdgeGraph(14, 6);
-    listEdge.push_back(*ed);
+    }
 
     cntEdges = listEdge.size();
     cntPoints = cntEdges + 1;
+
+}
+
+//-----------------------------------------------------------------------------
+int Graph::TestValidGraph()
+{
+    initPoints();
 
     // число ребер должно быть равно количеству точек - 1
     if (cntPoints - 1 != cntEdges)
@@ -109,136 +114,107 @@ int Graph::TestValidGraph()
     return EDGE_OK;
 }
 
-
 //-----------------------------------------------------------------------------
-void Graph::CalculateXY(int width, int hight)
+float Graph::CalculateForPoints(PointGraph* parent)
 {
-    std::vector<PointGraph*> *points = new std::vector<PointGraph*>();
-    unsigned int cntMaxPoints = 0;
-    int calcLevel;
-    int maxLevel = 0;
-    int delta;
-    int curX;
-    int curY;
-
-    // находим уровень с максимальным количеством точек
-    for (int i = 0; i <= cntLevels; i++)
-    {
-        GetListLevel(points, i);
-        if (cntMaxPoints < points->size())
-        {
-            cntMaxPoints = points->size();
-            maxLevel = i;
-        }
-    }
-
-    // расчет координат Х для максимального уровня
-    GetListLevel(points, maxLevel);
-    delta = (width - MARGIN - MARGIN) / (cntMaxPoints - 1);
-    curX = MARGIN;
-    curY = MARGIN + DELTA_Y * maxLevel;
-
-    for(unsigned int i = 0; i < points->size(); i++)
-    {
-        (*points)[i]->y = curY;
-        (*points)[i]->x = curX;
-        curX += delta;
-    }
-
-    //calcLevel = maxLevel;
-    //PointGraph* parent = NULL;
-
-    // расчет координат для уровней ниже
-    CalculateBottom(maxLevel, delta);
-
-    // расчет координат для уровней выше
-    CalculateTop(maxLevel, delta, width);
-    
-    delete points;
-}
-//-----------------------------------------------------------------------------
-void Graph::CalculateTop(int calcLevel, int delta, int width)
-{
-    int curY;
-    int curX;
-    std::vector<PointGraph*>* childPoints = new std::vector<PointGraph*>();
     std::vector<PointGraph*>* points = new std::vector<PointGraph*>();
-    PointGraph* parent = NULL;
 
-    while (--calcLevel >= 0)
+    float maxX = 0;
+    float minX = 1000000000;
+
+    // если нет дочерних точек, возвращаем -1
+    if (parent->cntChild == 0)
+        return -1;
+
+    // получаем список дочерних точек
+    GetChild(parent->number, points);
+
+    for (unsigned int i = 0; i < points->size(); i++)
     {
-        // получение всех точек уровня
-        GetListLevel(points, calcLevel);
-        curY = MARGIN + DELTA_Y * calcLevel;
-        curX = 0;
+        // рекурсивный вызов для каждой дочерней точки
+        float res = CalculateForPoints((*points)[i]);
 
-        for (unsigned int i = 0; i < points->size(); i++)
+        if (res < 0)
         {
-            (*points)[i]->y = curY;
-            // получение дочерних точек
-            GetChild((*points)[i]->number, childPoints);
-            // получение Х от дочерних точек
-
-            int max = 0;
-            int min = INT_MAX;
-            for (unsigned int j = 0; j < childPoints->size(); j++)
+            // если дочерних не было, то 
+            if (levelsX[(*points)[i]->level] < levelsX[(*points)[i]->level - 1])
             {
-                if ((*childPoints)[j]->x > max)
-                    max = (*childPoints)[j]->x;
-
-                if((*childPoints)[j]->x < min)
-                    min = (*childPoints)[j]->x;
-            }
-
-            if (min == max)
-            {
-                if (min > width / 2)
-                    curX = min - delta;
-                else
-                    curX = min + delta;
+                // если Х верхнего уровня больше, то считаем от него
+                (*points)[i]->x = levelsX[(*points)[i]->level - 1] + 1;
             }
             else
-                curX = min + (max - min) / 2;
-            (*points)[i]->x = curX;
+                // иначе берем следующую координату своего уровня
+                (*points)[i]->x = levelsX[(*points)[i]->level];
         }
+        else
+        {
+            // был возврат координвты Х от дочерних точек
+            (*points)[i]->x = res;
+        }
+        // увеличиваем координату своего уровня
+        levelsX[(*points)[i]->level] = (*points)[i]->x + 1;
+
+        if (maxX < (*points)[i]->x)
+            maxX = (*points)[i]->x;
+        if (minX > (*points)[i]->x)
+            minX = (*points)[i]->x;
+
+        (*points)[i]->y = (float)(*points)[i]->level;
+
     }
 
-    delete points;
-    delete childPoints;
+    // запоминаем максимальную координату Х
+    if (maxXGraph < maxX)
+        maxXGraph = maxX;
+
+    // если была всего одна точка
+    if (minX == maxX)
+        return -1;
+
+    // получаем середину между крайними точками
+    float result = (maxX - minX) / 2 + minX;
+
+    return result;
+
 }
+
 
 //-----------------------------------------------------------------------------
-void Graph::CalculateBottom(int calcLevel, int delta)
+void Graph::CalculateXY(int width, int height)
 {
-    int curY;
-    int curX;
-    PointGraph* parent = NULL;
     std::vector<PointGraph*>* points = new std::vector<PointGraph*>();
+    unsigned int cntMaxPoints = 0;
+    //int calcLevel;
+    int maxLevel = 0;
+    //int delta;
+    //int curX;
+    //int curY;
 
-    while (GetListLevel(points, ++calcLevel) > 0)
+    levelsX = new float[cntLevels + 1];
+    for (int i = 0; i <= cntLevels; i++)
+        levelsX[i] = 0;
+
+    maxXGraph = 0;
+
+    listPoint[0]->x = CalculateForPoints(listPoint[0]);
+
+    float scaleX = (float)(width - 2 * MARGIN) / maxXGraph;
+    float scaleY = (float)(height - 2 * MARGIN) / (float)(cntLevels + 1);
+
+    for (unsigned int i = 0; i < listPoint.size(); i++)
     {
-        curY = MARGIN + DELTA_Y * calcLevel;
-        curX = 0;
-        for (unsigned int i = 0; i < points->size(); i++)
-        {
-            (*points)[i]->y = curY;
-
-            if (parent != (*points)[i]->parent)
-            {
-                parent = (*points)[i]->parent;
-                curX = parent->x - delta/3;
-                if (curX < MARGIN)
-                    curX = MARGIN;
-            }
-
-            (*points)[i]->x = curX;
-            curX += delta/2;
-        }
+        listPoint[i]->x = listPoint[i]->x * scaleX + MARGIN;
+        listPoint[i]->y = listPoint[i]->y * scaleY + MARGIN;
     }
-    delete points;
+
+    delete levelsX;
+    return;
 }
 
 
+
+//-----------------------------------------------------------------------------
+// получение дочерних точек
 //-----------------------------------------------------------------------------
 void Graph::GetChild(int num, std::vector<PointGraph*>* list_Pt)
 {
@@ -256,6 +232,8 @@ void Graph::GetChild(int num, std::vector<PointGraph*>* list_Pt)
 }
 
 
+//-----------------------------------------------------------------------------
+// получение списка точек для уровня
 //-----------------------------------------------------------------------------
 int Graph::GetListLevel(std::vector<PointGraph*> *list_Pt, int level)
 {
@@ -275,6 +253,8 @@ int Graph::GetListLevel(std::vector<PointGraph*> *list_Pt, int level)
 }
 
 
+//-----------------------------------------------------------------------------
+// рисование графа
 //-----------------------------------------------------------------------------
 void Graph::RenderGraph(int width, int hight, HINSTANCE hInstance, HWND hDlg)
 {

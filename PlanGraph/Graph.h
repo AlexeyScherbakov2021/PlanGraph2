@@ -20,14 +20,18 @@ private:
 	int cntLevels;
 	int Width;
 	int Height;
+	float* levelsX;
+	float maxXGraph;
+
 
 	void CalcPoints(int num, PointGraph* parent);
 	void CalculateXY(int width, int hight);
+	float CalculateForPoints(PointGraph* parent);
 	int GetListLevel(std::vector<PointGraph*> *points, int level);
 	void GetChild(int num, std::vector<PointGraph*>* list_Pt);
-	void CalculateTop(int calcLevel, int delta, int width);
-	void CalculateBottom(int calcLevel,int delta);
 	void PaintGraph(int width, int hight, HINSTANCE hInstance, HWND hDlg);
+	void initPoints();
+
 
 public:
 	std::vector<EdgeGraph> listEdge;

@@ -6,8 +6,8 @@ public:
 	int level;
 	int cntChild;
 	PointGraph *parent;
-	int x;
-	int y;
+	float x;
+	float y;
 
 public:
 	PointGraph();
