@@ -11,47 +11,42 @@ ATOM MyRegisterClass(HINSTANCE hInstance);
 
 void Graph::PaintGraph(HINSTANCE hInstance, HWND hDlg)
 {
+    // регистрация класса окна
     ATOM res = MyRegisterClass(hInstance);
 
+    // ширина и высота экрана
     int wScreen = GetSystemMetrics(SM_CXSCREEN);
     int hScreen = GetSystemMetrics(SM_CYSCREEN);
 
-
+    // создание окна
     HWND hWnd = CreateWindow(szClass, _T("Планарный граф"), WS_OVERLAPPEDWINDOW,
-        (wScreen - Width) / 2, (hScreen - Height) / 2, Width + 10, Height + 10, nullptr, nullptr, hInstance, nullptr);
+        (wScreen - Width) / 2, (hScreen - Height) / 2, Width + 20, Height + 40, nullptr, nullptr, hInstance, nullptr);
 
     if (!hWnd)
-    {
         return;
-    }
 
+    // отображение окна
     ShowWindow(hWnd, SW_SHOWDEFAULT);
     UpdateWindow(hWnd);
 }
 
 
-
+//------------------------------------------------------------------------------------
+// фнукция обратного вызова для обработки событий окна
+//------------------------------------------------------------------------------------
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    RECT lpRect;
-    LONG x, y;
+    //RECT lpRect;
+    //LONG x, y;
 
     switch (message)
     {
-
-    case WM_INITDIALOG:
-        x = GetSystemMetrics(SM_CXSCREEN);
-        y = GetSystemMetrics(SM_CYSCREEN);
-        GetWindowRect(hWnd, &lpRect);
-        SetWindowPos(hWnd, HWND_TOP, (x - lpRect.right) / 2, (y - lpRect.bottom) / 2, 200, 200, SWP_NOSIZE | SWP_SHOWWINDOW);
-
-        return (INT_PTR)TRUE;
-
-
+        // событие отрисоки окна
     case WM_PAINT:
         {
         PAINTSTRUCT ps;
         HDC hdc = BeginPaint(hWnd, &ps);
+        // вывзываем функцию рисования
         graph.PaintLevel(hdc);
         EndPaint(hWnd, &ps);
         }
@@ -74,6 +69,9 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 }
 
 
+//------------------------------------------------------------------------------------
+// функция регистрации класса окна
+//------------------------------------------------------------------------------------
 ATOM MyRegisterClass(HINSTANCE hInstance)
 {
     WNDCLASSEX wcex;
@@ -96,6 +94,9 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 }
 
 
+//------------------------------------------------------------------------------------
+// отрисовка графа
+//------------------------------------------------------------------------------------
 void Graph::PaintLevel(HDC hdc)
 {
     int x;
@@ -103,25 +104,43 @@ void Graph::PaintLevel(HDC hdc)
 
     if (type == RADIAL_TYPE)
     {
-        int diametr = radius * 2 * cntLevels;
+        // для радиального типа рисуем концентрические окружности
+
+        // для удобста вводим диаметр для максимального уровня
+        int diametr = (int)(radius * 2 * cntLevels);
+
+        // будем вписывать в минимальлный размер
         int minSize = Width;
         if (minSize > Height)
             minSize = Height;
 
+        // выбираем объект пера для рисования
+        HGDIOBJ original = SelectObject(hdc, GetStockObject(DC_PEN));
+        // задаем серый цвет
+        SetDCPenColor(hdc, RGB(192, 192, 192));
+
+        // рисование окружностей
         for (int i = 0; i < cntLevels; i++)
         {
             int left = (minSize - diametr) / 2;
             int right = left + diametr;
             Ellipse(hdc, left, left, right, right);
-            diametr -= radius * 2;
+            // уменьшаем радиус
+            diametr -= (int)(radius * 2);
         }
+        // восстанавливаем объект пера рисования
+        SelectObject(hdc, original);
     }
 
+    // рисование линий соединения точек
     for (unsigned int i = 0; i < listPoint.size(); i++)
     {
+        // рисуем от дочерней к родительской точке, поэтому точку без родителя пропускаем
         if (listPoint[i]->parent != NULL)
         {
+            // переход в координату точки
             MoveToEx(hdc, (int)listPoint[i]->x, (int)listPoint[i]->y, NULL);
+            // рисование линии в координату родительской точки
             LineTo(hdc, (int)listPoint[i]->parent->x, (int)listPoint[i]->parent->y);
         }
     }
@@ -129,17 +148,24 @@ void Graph::PaintLevel(HDC hdc)
     RECT rc;
     TCHAR buffer[4];
 
+    // рисование точек
     for (unsigned int i = 0; i < listPoint.size(); i++)
     {
+        // вычисляем координату для окружности точки
         x = (int)listPoint[i]->x - RADIUS_CIRCLE;
         y = (int)listPoint[i]->y - RADIUS_CIRCLE;
+        // рисуем окружность
         Ellipse(hdc, x, y, (int)listPoint[i]->x + RADIUS_CIRCLE, (int)listPoint[i]->y + RADIUS_CIRCLE);
+
+        // заполняем координаты квадрата для вывода текста
         rc.left = x;
         rc.top = y;
         rc.right = x + RADIUS_CIRCLE * 2;
         rc.bottom = y + RADIUS_CIRCLE * 2;
 
+        // преобразуем номер точки в строку
         _itot_s(listPoint[i]->number, buffer, 4, 10);
+        // рисуем номер точки
         DrawText(hdc, buffer, lstrlen(buffer), &rc, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
     }
 

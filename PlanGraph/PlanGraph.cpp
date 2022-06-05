@@ -38,6 +38,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     MSG msg;
 
+    // создание главного окна
     hDlg = CreateDialog(hInstance, MAKEINTRESOURCE(IDD_MAIN), NULL, WndProc);
 
     listBox = GetDlgItem(hDlg, IDC_LIST_EDGE);
@@ -59,6 +60,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 }
 
 //-----------------------------------------------------------------------------
+// функция обратного вызова обработки событий гланого окна
+//-----------------------------------------------------------------------------
 INT_PTR CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     RECT lpRect;
@@ -71,6 +74,7 @@ INT_PTR CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
     switch (message)
     {
+        // событие инициализации диалогового окна
     case WM_INITDIALOG:
         x = GetSystemMetrics(SM_CXSCREEN);
         y = GetSystemMetrics(SM_CYSCREEN);
@@ -79,7 +83,7 @@ INT_PTR CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
         return (INT_PTR)TRUE;
 
-
+        // изменение цвета для статуса проверки
     case WM_CTLCOLORSTATIC:
         if (((HWND)lParam) == GetDlgItem(hWnd, IDC_STATIC_TEST))
         {
@@ -92,17 +96,19 @@ INT_PTR CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
         break;
 
+        // командные соытия для диалогового окна
     case WM_COMMAND:
         {
             int wmId = LOWORD(wParam);
-            // Разобрать выбор в меню:
             switch (wmId)
             {
 
+                // кнопка закрыть
             case IDCANCEL:
                 DestroyWindow(hWnd);
                 break;
 
+                // тектовое окно для ввода количества точек
             case IDC_EDIT_COUNT:
 
                 if (HIWORD(wParam) == 0x200)
@@ -128,7 +134,6 @@ INT_PTR CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                         ComboBox_AddString(combo2, buf);
                     }
                 }
-
                 break;
 
                 // добавление ребра в список
@@ -150,26 +155,31 @@ INT_PTR CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
                 break;
 
+                // нажатие кнопки поуровневого отображения
             case IDC_BUTTON_RENDER:
                 graph.RenderGraph(500, 500, hInst, hDlg, LEVEL_TYPE);
                 break;
 
+                // нажатие кнопки радиального отображения
             case IDC_BUTTON_RADIAL:
                 graph.RenderGraph(500, 500, hInst, hDlg, RADIAL_TYPE);
                 break;
 
-
+                // кнопка удаления ребра из списка
             case IDC_BUTTON_DELETE:
                 x = ListBox_GetCurSel(listBox);
                 if (x >= 0)
                 {
+                    // получаем приязанный к строке объект ребра для удаления
                     edge = (EdgeGraph*)ListBox_GetItemData(listBox, x);
                     delete edge;
                     ListBox_DeleteString(listBox, x);
+                    // проводим проверку дерева
                     IsTestValid = TestValid();
                 }
                 break;
 
+                // нажатие кнопки ручной проверки
             case IDC_BUTTON_TEST:
                 IsTestValid = TestValid();
                 break;
@@ -180,6 +190,7 @@ INT_PTR CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
         break;
 
+        // событие уничтожения окна
     case WM_DESTROY:
         PostQuitMessage(0);
         break;
@@ -190,26 +201,31 @@ INT_PTR CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     return FALSE;
 }
 
-
+//-----------------------------------------------------------------------------
+// функция проверки правильности дерева
 //-----------------------------------------------------------------------------
 bool TestValid()
 {
     EdgeGraph* ed;
     bool result = FALSE;
 
+    // получаем хендлы для кнопок и текста статуса проверки
     HWND hwnd = GetDlgItem(hDlg, IDC_STATIC_TEST);
     HWND hWndRender = GetDlgItem(hDlg, IDC_BUTTON_RENDER);
     HWND hWndRadial = GetDlgItem(hDlg, IDC_BUTTON_RADIAL);
 
     graph.cntEdges = ListBox_GetCount(listBox);
 
+    // очищаем список ребер
     graph.listEdge.clear();
+    // наполняем список из строк ListBox
     for (int i = 0; i < graph.cntEdges; i++)
     {
         ed = (EdgeGraph*)ListBox_GetItemData(listBox, i);
         graph.listEdge.push_back(*ed);
     }
 
+    // производим проверку
     int res = graph.TestValidGraph();
 
     if (res == 0)
@@ -224,6 +240,7 @@ bool TestValid()
     if (res == INVALID_EDGE)
         SetDlgItemText(hDlg, IDC_STATIC_TEST, _T("Неверное количество ребер."));
 
+    // обновление статуса текста и кнопок
     ShowWindow(hwnd, FALSE);
     ShowWindow(hwnd, TRUE);
     EnableWindow(hWndRender, result);

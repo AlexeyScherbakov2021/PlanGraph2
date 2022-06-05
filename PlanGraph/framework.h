@@ -17,6 +17,6 @@
 #include <windowsx.h>
 #include <string>
 #include <vector>
-#include <list>
-#include <iterator>
+//#include <list>
+//#include <iterator>
 

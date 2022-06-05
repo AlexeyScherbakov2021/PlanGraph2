@@ -16,21 +16,23 @@
 #define LEVEL_TYPE 1
 #define RADIAL_TYPE 2
 
+#define PI 3.14159265
+
 class Graph
 {
 private:
-	std::vector<PointGraph*> listPoint;
-	int cntLevels;
-	int Width;
-	int Height;
-	float* levelsX;
-	float maxXGraph;
-	int type;
-	float radius;
+	std::vector<PointGraph*> listPoint;		// список точек
+	int cntLevels;							// число уровней
+	int Width;								// ширина окна вывода
+	int Height;								// высота окна вывода
+	double* levelsX;							// указатель на массив с координатами ’ дл€ уровней
+	double maxXGraph;						// максимальна€ координата ’ дл€ возможности вписани€ графа в окно
+	int type;								// тип отрисовки графа
+	double radius;							// радиус приращени€ дл€ радиального графа
 
 	void CalcPoints(int num, PointGraph* parent);
 	void CalculateXY();
-	float CalculateForPoints(PointGraph* parent);
+	double CalculateForPoints(PointGraph* parent);
 	int GetListLevel(std::vector<PointGraph*> *points, int level);
 	void GetChild(int num, std::vector<PointGraph*>* list_Pt);
 	void PaintGraph(HINSTANCE hInstance, HWND hDlg);
@@ -39,8 +41,8 @@ private:
 
 public:
 	std::vector<EdgeGraph> listEdge;
-	int cntPoints;
-	int cntEdges;
+	int cntPoints;							// количество точек
+	int cntEdges;							// количество ребер
 
 	Graph();
 	~Graph();

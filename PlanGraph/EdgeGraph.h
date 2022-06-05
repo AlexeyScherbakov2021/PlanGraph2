@@ -5,9 +5,9 @@
 class EdgeGraph
 {
 private:
-	int point1;
-	int point2;
-	TCHAR name[20];
+	int point1;				// номер первой точки ребра
+	int point2;				// номер второй точки ребра
+	TCHAR name[20];			// строка для списка в ListBox
 public:
 	EdgeGraph();
 	EdgeGraph(int p1, int p2);
