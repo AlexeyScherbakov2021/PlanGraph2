@@ -13,6 +13,9 @@
 
 #define RADIUS_CIRCLE 12
 
+#define LEVEL_TYPE 1
+#define RADIAL_TYPE 2
+
 class Graph
 {
 private:
@@ -22,7 +25,8 @@ private:
 	int Height;
 	float* levelsX;
 	float maxXGraph;
-
+	int type;
+	float radius;
 
 	void CalcPoints(int num, PointGraph* parent);
 	void CalculateXY();
@@ -41,7 +45,7 @@ public:
 	Graph();
 	~Graph();
 	int TestValidGraph();
-	void RenderGraph(int width, int hight, HINSTANCE hInstance, HWND hDlg);
+	void RenderGraph(int width, int hight, HINSTANCE hInstance, HWND hDlg, int type);
 	void PaintLevel(HDC hdc);
 };
 

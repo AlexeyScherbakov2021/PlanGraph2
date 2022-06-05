@@ -101,6 +101,22 @@ void Graph::PaintLevel(HDC hdc)
     int x;
     int y;
 
+    if (type == RADIAL_TYPE)
+    {
+        int diametr = radius * 2 * cntLevels;
+        int minSize = Width;
+        if (minSize > Height)
+            minSize = Height;
+
+        for (int i = 0; i < cntLevels; i++)
+        {
+            int left = (minSize - diametr) / 2;
+            int right = left + diametr;
+            Ellipse(hdc, left, left, right, right);
+            diametr -= radius * 2;
+        }
+    }
+
     for (unsigned int i = 0; i < listPoint.size(); i++)
     {
         if (listPoint[i]->parent != NULL)

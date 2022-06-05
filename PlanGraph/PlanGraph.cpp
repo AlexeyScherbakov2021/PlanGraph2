@@ -9,7 +9,7 @@
 
 #define MAX_LOADSTRING 100
 
-// Глобальные переменные:
+// Глобальные переменные:F
 HINSTANCE hInst;                                // текущий экземпляр
 WCHAR szTitle[MAX_LOADSTRING];                  // Текст строки заголовка
 WCHAR szWindowClass[MAX_LOADSTRING];            // имя класса главного окна
@@ -151,9 +151,13 @@ INT_PTR CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 break;
 
             case IDC_BUTTON_RENDER:
-                graph.RenderGraph(500, 500, hInst, hDlg);
-
+                graph.RenderGraph(500, 500, hInst, hDlg, LEVEL_TYPE);
                 break;
+
+            case IDC_BUTTON_RADIAL:
+                graph.RenderGraph(500, 500, hInst, hDlg, RADIAL_TYPE);
+                break;
+
 
             case IDC_BUTTON_DELETE:
                 x = ListBox_GetCurSel(listBox);
@@ -191,8 +195,11 @@ INT_PTR CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 bool TestValid()
 {
     EdgeGraph* ed;
+    bool result = FALSE;
 
     HWND hwnd = GetDlgItem(hDlg, IDC_STATIC_TEST);
+    HWND hWndRender = GetDlgItem(hDlg, IDC_BUTTON_RENDER);
+    HWND hWndRadial = GetDlgItem(hDlg, IDC_BUTTON_RADIAL);
 
     graph.cntEdges = ListBox_GetCount(listBox);
 
@@ -208,24 +215,19 @@ bool TestValid()
     if (res == 0)
     {
         SetDlgItemText(hDlg, IDC_STATIC_TEST, _T("Корректно."));
-        ShowWindow(hwnd, FALSE);
-        ShowWindow(hwnd, TRUE);
-        return TRUE;
+        result = TRUE;
     }
 
     if (res == CYCLED_SIDE)
-    {
         SetDlgItemText(hDlg, IDC_STATIC_TEST, _T("Есть циклические грани."));
-        ShowWindow(hwnd, FALSE);
-        ShowWindow(hwnd, TRUE);
-    }
 
     if (res == INVALID_EDGE)
-    {
         SetDlgItemText(hDlg, IDC_STATIC_TEST, _T("Неверное количество ребер."));
-        ShowWindow(hwnd, FALSE);
-        ShowWindow(hwnd, TRUE);
-    }
 
-    return FALSE;
+    ShowWindow(hwnd, FALSE);
+    ShowWindow(hwnd, TRUE);
+    EnableWindow(hWndRender, result);
+    EnableWindow(hWndRadial, result);
+
+    return result;
 }

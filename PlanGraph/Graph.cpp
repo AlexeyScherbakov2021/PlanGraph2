@@ -8,6 +8,7 @@ Graph::Graph()
     cntLevels = 0;
     Width = 500;
     Height = 500;
+    type = LEVEL_TYPE;
 }
 
 Graph::~Graph()
@@ -56,6 +57,34 @@ void Graph::initPoints()
 {
     int listInitEdge[][2] =
     {
+        //{1,2},
+        //{1,3},
+        //{1,4},
+        //{2,5},
+        //{2,6},
+        //{2,7},
+        //{3,8},
+        //{3,9},
+        //{3,10},
+        //{4,11},
+        //{4,12},
+        //{4,13},
+        //{4,14},
+        //{4,15},
+        //{5,16},
+        //{5,17},
+        //{5,18},
+        //{5,19},
+        //{5,20},
+        //{6,21},
+        //{6,22},
+        //{7,23},
+        //{7,24},
+        //{7,25},
+        //{9,26},
+        //{9,27},
+        //{9,28},
+        // 
         {1,2},
         {1,3},
         {2,4},
@@ -211,13 +240,33 @@ void Graph::CalculateXY()
 
     listPoint[0]->x = CalculateForPoints(listPoint[0]);
 
-    float scaleX = (float)(Width - 2 * MARGIN) / maxXGraph;
-    float scaleY = (float)(Height - 2 * MARGIN) / (float)(cntLevels + 1);
+    if (type == RADIAL_TYPE)
+    { 
+        // градусов в расчетной единице Х
+        float Deg = 360.0 / (maxXGraph + 1);
+        int  minSize = Width;
+        if (minSize > Height)
+            minSize = Height;
 
-    for (unsigned int i = 0; i < listPoint.size(); i++)
+        int center = minSize / 2;
+        radius = (float)((minSize - MARGIN * 2.0) / 2.0) / (float)(cntLevels);
+        for (int i = 0; i < listPoint.size(); i++)
+        {
+            listPoint[i]->y = sin(listPoint[i]->x * Deg * 3.1415 / 180) * radius * listPoint[i]->level + center;
+            listPoint[i]->x = cos(listPoint[i]->x * Deg * 3.1415 / 180) * radius * listPoint[i]->level + center;
+        }
+
+    }
+    else
     {
-        listPoint[i]->x = listPoint[i]->x * scaleX + MARGIN;
-        listPoint[i]->y = listPoint[i]->y * scaleY + MARGIN;
+        float scaleX = (float)(Width - 2 * MARGIN) / maxXGraph;
+        float scaleY = (float)(Height - 2 * MARGIN) / (float)(cntLevels + 1);
+
+        for (unsigned int i = 0; i < listPoint.size(); i++)
+        {
+            listPoint[i]->x = listPoint[i]->x * scaleX + MARGIN;
+            listPoint[i]->y = listPoint[i]->y * scaleY + MARGIN;
+        }
     }
 
     delete levelsX;
@@ -269,10 +318,11 @@ int Graph::GetListLevel(std::vector<PointGraph*> *list_Pt, int level)
 //-----------------------------------------------------------------------------
 // рисование графа
 //-----------------------------------------------------------------------------
-void Graph::RenderGraph(int width, int height, HINSTANCE hInstance, HWND hDlg)
+void Graph::RenderGraph(int width, int height, HINSTANCE hInstance, HWND hDlg, int type)
 {
     Width = width;
     Height = height;
+    this->type = type;
     CalculateXY();
     PaintGraph(hInstance, hDlg);
 
