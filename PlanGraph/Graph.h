@@ -25,7 +25,7 @@ private:
 	int cntLevels;							// число уровней
 	int Width;								// ширина окна вывода
 	int Height;								// высота окна вывода
-	double* levelsX;							// указатель на массив с координатами ’ дл€ уровней
+	double* levelsX;						// указатель на массив с координатами ’ дл€ уровней
 	double maxXGraph;						// максимальна€ координата ’ дл€ возможности вписани€ графа в окно
 	int type;								// тип отрисовки графа
 	double radius;							// радиус приращени€ дл€ радиального графа
@@ -35,7 +35,7 @@ private:
 	double CalculateForPoints(PointGraph* parent);
 	int GetListLevel(std::vector<PointGraph*> *points, int level);
 	void GetChild(int num, std::vector<PointGraph*>* list_Pt);
-	void PaintGraph(HINSTANCE hInstance, HWND hDlg);
+	void PaintGraph(HINSTANCE hInstance);
 	void initPoints();
 
 
@@ -48,6 +48,6 @@ public:
 	~Graph();
 	int TestValidGraph();
 	void RenderGraph(int width, int hight, HINSTANCE hInstance, HWND hDlg, int type);
-	void PaintLevel(HDC hdc);
+	void Paint(HDC hdc);
 };
 

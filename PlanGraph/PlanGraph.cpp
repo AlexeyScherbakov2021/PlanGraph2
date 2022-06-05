@@ -79,7 +79,8 @@ INT_PTR CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         x = GetSystemMetrics(SM_CXSCREEN);
         y = GetSystemMetrics(SM_CYSCREEN);
         GetWindowRect(hWnd, &lpRect);
-        SetWindowPos(hWnd, HWND_TOP, (x - lpRect.right) / 2, (y - lpRect.bottom) / 2, 200, 200, SWP_NOSIZE | SWP_SHOWWINDOW);
+        SetWindowPos(hWnd, HWND_TOP, (x - lpRect.right) / 2, (y - lpRect.bottom) / 2, 200, 200, SWP_NOSIZE 
+            | SWP_SHOWWINDOW);
 
         return (INT_PTR)TRUE;
 
@@ -228,7 +229,7 @@ bool TestValid()
     // производим проверку
     int res = graph.TestValidGraph();
 
-    if (res == 0)
+    if (res == EDGE_OK)
     {
         SetDlgItemText(hDlg, IDC_STATIC_TEST, _T("Корректно."));
         result = TRUE;

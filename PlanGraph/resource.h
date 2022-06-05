@@ -21,7 +21,6 @@
 #define IDC_BUTTON_RENDER               1006
 #define IDC_BUTTON_TEST                 1007
 #define IDC_STATIC_TEST                 1008
-#define IDC_BUTTON_RENDER2              1009
 #define IDC_BUTTON_RADIAL               1009
 #define IDC_STATIC                      -1
 

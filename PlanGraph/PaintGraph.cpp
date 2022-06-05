@@ -2,6 +2,7 @@
 #include "Graph.h"
 
 extern Graph graph;
+extern HWND hDlg;
 
 TCHAR szClass[] = _T("classGraph");
 
@@ -9,7 +10,7 @@ LRESULT  CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
 ATOM MyRegisterClass(HINSTANCE hInstance);
 
 
-void Graph::PaintGraph(HINSTANCE hInstance, HWND hDlg)
+void Graph::PaintGraph(HINSTANCE hInstance)
 {
     // регистрация класса окна
     ATOM res = MyRegisterClass(hInstance);
@@ -24,6 +25,8 @@ void Graph::PaintGraph(HINSTANCE hInstance, HWND hDlg)
 
     if (!hWnd)
         return;
+
+    EnableWindow(hDlg, FALSE);
 
     // отображение окна
     ShowWindow(hWnd, SW_SHOWDEFAULT);
@@ -47,16 +50,13 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
         PAINTSTRUCT ps;
         HDC hdc = BeginPaint(hWnd, &ps);
         // вывзываем функцию рисования
-        graph.PaintLevel(hdc);
+        graph.Paint(hdc);
         EndPaint(hWnd, &ps);
         }
         break;
        
-
-    case WM_DESTROY:
-        break;
-
     case WM_CLOSE:
+        EnableWindow(hDlg, TRUE);
         DestroyWindow(hWnd);
         break;
 
@@ -97,7 +97,7 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 //------------------------------------------------------------------------------------
 // отрисовка графа
 //------------------------------------------------------------------------------------
-void Graph::PaintLevel(HDC hdc)
+void Graph::Paint(HDC hdc)
 {
     int x;
     int y;
