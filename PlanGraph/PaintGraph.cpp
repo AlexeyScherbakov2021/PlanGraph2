@@ -101,6 +101,8 @@ void Graph::Paint(HDC hdc)
 {
     int x;
     int y;
+    HGDIOBJ original;
+    HGDIOBJ origPen;
 
     if (type == RADIAL_TYPE)
     {
@@ -115,7 +117,7 @@ void Graph::Paint(HDC hdc)
             minSize = Height;
 
         // выбираем объект пера для рисования
-        HGDIOBJ original = SelectObject(hdc, GetStockObject(DC_PEN));
+        original = SelectObject(hdc, GetStockObject(DC_PEN));
         // задаем серый цвет
         SetDCPenColor(hdc, RGB(192, 192, 192));
 
@@ -131,6 +133,10 @@ void Graph::Paint(HDC hdc)
         // восстанавливаем объект пера рисования
         SelectObject(hdc, original);
     }
+
+    // создание и выбор пера
+    HPEN hPen = CreatePen(PS_SOLID, 2, RGB(0, 0, 0));
+    origPen = SelectObject(hdc, hPen);
 
     // рисование линий соединения точек
     for (unsigned int i = 0; i < listPoint.size(); i++)
@@ -148,6 +154,12 @@ void Graph::Paint(HDC hdc)
     RECT rc;
     TCHAR buffer[4];
 
+    // установка прозрачного фона
+    SetBkMode(hdc, TRANSPARENT);
+
+    // выбор серой кисти
+    original = SelectObject(hdc, GetStockObject(DC_BRUSH));
+    SetDCBrushColor(hdc, RGB(240, 240, 240));
     // рисование точек
     for (unsigned int i = 0; i < listPoint.size(); i++)
     {
@@ -155,6 +167,7 @@ void Graph::Paint(HDC hdc)
         x = (int)listPoint[i]->x - RADIUS_CIRCLE;
         y = (int)listPoint[i]->y - RADIUS_CIRCLE;
         // рисуем окружность
+        
         Ellipse(hdc, x, y, (int)listPoint[i]->x + RADIUS_CIRCLE, (int)listPoint[i]->y + RADIUS_CIRCLE);
 
         // заполняем координаты квадрата для вывода текста
@@ -168,5 +181,10 @@ void Graph::Paint(HDC hdc)
         // рисуем номер точки
         DrawText(hdc, buffer, lstrlen(buffer), &rc, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
     }
+
+    // восстанвление исходных данных контекста
+    SelectObject(hdc, original);
+    SelectObject(hdc, origPen);
+    DeleteObject(hPen);
 
 }
